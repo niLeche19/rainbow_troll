@@ -1,13 +1,30 @@
+"""
+Author: Nick Lee
+Date created: 11.12.2020
+Date last modified: 11.13.2020
+
+project:
+This program will make spray patterns in valorent intollerable
+
+Citations: 
+https://stackoverflow.com/questions/3429250/determining-running-programs-in-python
+https://pyautogui.readthedocs.io/en/latest/
+https://nitratine.net/blog/post/how-to-get-mouse-clicks-with-python/ #not used
+https://pypi.org/project/pynput/ #i used this instead
+"""
+
 import string
 import subprocess
 import sys
-from time import sleep
+import time
+
+sys.path.append("D:\Python stuff\Lib\site-packages")
 import pyautogui as pag
+from pynput.mouse import Listener
 
 cmd = 'WMIC PROCESS get Caption'
 proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 
-recurse = 0
 
 IS_RUNNING = "chrome"
 
@@ -36,7 +53,23 @@ def checkFor(progName):
     print("False")
     return False
 
+curTime = 0
+clicklist = []
+def on_click(x, y, button, pressed):
+    global curTime, clicklist
+    if(pressed):
+        curTime = int(time.time() * 1000)
+    else:
+        print(int(time.time() * 1000) - curTime)
+        clicklist.append(int(time.time() * 1000) - curTime)
+        #print(curtime % 1000)
+    #print ("Mouse clicked")
+
+listener = Listener(on_click=on_click)
+listener.start()
+
 # check if IS_RUNNING is running. Will print true or false
 checkFor(IS_RUNNING)
 
-
+time.sleep(10)
+print(sum(clicklist) / len(clicklist))
