@@ -29,7 +29,6 @@ proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 #variables
 mouseDown = False
 running = False
-runCheck = False
 curTime = 0
 avgClick = 70
 sleepTime = 10
@@ -55,37 +54,36 @@ def checkFor(progName):
     for line in proc.stdout:
         # check for a match with the case name
         if(getName(line) == progName):
-            #running = True
             return True
 
     # if the loop finishes then there were no matches
-    #running = False
     return False
 
 
-
+#this is a little multi-threaded bastard but it works
 def on_click(x, y, button, pressed):
     global curTime, mouseDown
-
+    #this will constantly update mouseDown to True or False
     if(pressed):
         mouseDown = True
-        #curTime = int(time.time() * 1000)
     else:
         mouseDown = False
 
 listener = Listener(on_click=on_click)
 listener.start()
 
-# check if IS_RUNNING is running. Will print true or false
+# check if IS_RUNNING is running. Will print true or false. This only runs once
 print(checkFor(IS_RUNNING))
-
 
 curTime = int(time.time())
 while True:
-    time.sleep(0.01)
-    if(int(time.time()) - curTime > 1):
-        print(running, mouseDown)
-        #checkFor(IS_RUNNING)
+    # small delay as to not overload the CPU
+    time.sleep(sleepTime)
+
+    # this will check every second if the specified program is running or not. It will update running accordingly
+    if(int(time.time()) - curTime > 10):
+        #print(running, mouseDown) #debugging
+
         if(checkFor(IS_RUNNING) and not(running)):
             running = True
             print("running")
