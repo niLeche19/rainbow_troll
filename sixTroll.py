@@ -13,20 +13,25 @@ https://nitratine.net/blog/post/how-to-get-mouse-clicks-with-python/ #not used
 https://pypi.org/project/pynput/ #i used this instead
 """
 
+#imports
 import string
 import subprocess
 import sys
 import time
-
 sys.path.append("D:\Python stuff\Lib\site-packages")
 import pyautogui as pag
 from pynput.mouse import Listener
 
+#for task getting
 cmd = 'WMIC PROCESS get Caption'
 proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 
-
-IS_RUNNING = "chrome"
+#variables
+mouseDown = False
+running = False
+curTime = 0
+avgClick = 70
+IS_RUNNING = "VALORANT"
 
 def getName(linee):
     # this is the output string
@@ -53,23 +58,28 @@ def checkFor(progName):
     print("False")
     return False
 
-curTime = 0
-clicklist = []
 def on_click(x, y, button, pressed):
-    global curTime, clicklist
+    global curTime, mouseDown
     if(pressed):
         curTime = int(time.time() * 1000)
     else:
+        #clicklist.append(int(time.time() * 1000) - curTime)
         print(int(time.time() * 1000) - curTime)
-        clicklist.append(int(time.time() * 1000) - curTime)
-        #print(curtime % 1000)
-    #print ("Mouse clicked")
 
 listener = Listener(on_click=on_click)
 listener.start()
-
+listener.stop()
 # check if IS_RUNNING is running. Will print true or false
 checkFor(IS_RUNNING)
 
+while True:
+    time.sleep(10)
+    running = checkFor(IS_RUNNING)
+    """
+    if(checkFor(IS_RUNNING) and not(running)):
+        running = True
+    else:
+        running = False
+    """
+
 time.sleep(10)
-print(sum(clicklist) / len(clicklist))
