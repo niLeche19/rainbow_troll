@@ -1,2 +1,2 @@
 # rainbow_troll
-Contains experimental files for rainbow 6 trolling
+This is purely to troll my friends computer while he plays rainbow 6 siege
