@@ -29,9 +29,11 @@ proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 #variables
 mouseDown = False
 running = False
+runCheck = False
 curTime = 0
 avgClick = 70
-IS_RUNNING = "VALORANT"
+sleepTime = 10
+IS_RUNNING = "slack"
 
 def getName(linee):
     # this is the output string
@@ -47,39 +49,54 @@ def getName(linee):
             return(strOut)
 
 def checkFor(progName):
+    global running
     # check each line in the running program output
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     for line in proc.stdout:
         # check for a match with the case name
         if(getName(line) == progName):
-            print("True")
+            #running = True
             return True
 
     # if the loop finishes then there were no matches
-    print("False")
+    #running = False
     return False
+
+
 
 def on_click(x, y, button, pressed):
     global curTime, mouseDown
+
     if(pressed):
-        curTime = int(time.time() * 1000)
+        mouseDown = True
+        #curTime = int(time.time() * 1000)
     else:
-        #clicklist.append(int(time.time() * 1000) - curTime)
-        print(int(time.time() * 1000) - curTime)
+        mouseDown = False
 
 listener = Listener(on_click=on_click)
 listener.start()
-listener.stop()
+
 # check if IS_RUNNING is running. Will print true or false
-checkFor(IS_RUNNING)
+print(checkFor(IS_RUNNING))
 
+
+curTime = int(time.time())
 while True:
-    time.sleep(10)
-    running = checkFor(IS_RUNNING)
-    """
-    if(checkFor(IS_RUNNING) and not(running)):
-        running = True
-    else:
-        running = False
-    """
+    time.sleep(0.01)
+    if(int(time.time()) - curTime > 1):
+        print(running, mouseDown)
+        #checkFor(IS_RUNNING)
+        if(checkFor(IS_RUNNING) and not(running)):
+            running = True
+            print("running")
+            sleepTime = 0.02
 
-time.sleep(10)
+        elif(not(checkFor(IS_RUNNING)) and running):
+            running = False
+            print("not running")
+            sleepTime = 10
+        curTime = int(time.time())
+
+    elif(mouseDown and running): 
+        print(mouseDown)
+    
