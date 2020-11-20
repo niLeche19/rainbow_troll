@@ -20,19 +20,27 @@ import sys
 import time
 sys.path.append("D:\Python stuff\Lib\site-packages")
 import pyautogui as pag
-from pynput.mouse import Listener
+from pynput.mouse import Listener, Controller
+from random import randint
 
 #for task getting
 cmd = 'WMIC PROCESS get Caption'
 proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
 
 #variables
-mouseDown = False
-running = False
-curTime = 0
-avgClick = 70
-sleepTime = 10
-IS_RUNNING = "slack"
+timeDown = 0 # how long the mouse mas ben depressed
+mouseDown = False # true if the mouse is down
+mouseDownTwo = False # for resetting timeDown
+running = False # true if IS_RUNNING is running
+curTime = 0 # for checking when to check if isRunning
+DEPRESSO = 90
+SLEEP_TIME = 2 # the loop delay, this reduces when the program is running
+IS_RUNNING = "slack" # this is the program you want to check for
+CHECK_DELAY = 1 # how long the program waits before checking if running again
+
+# this is the velocity of the mouse when depressed
+XVEL = 10
+YVEL = -10
 
 def getName(linee):
     # this is the output string
@@ -62,7 +70,7 @@ def checkFor(progName):
 
 #this is a little multi-threaded bastard but it works
 def on_click(x, y, button, pressed):
-    global curTime, mouseDown
+    global mouseDown
     #this will constantly update mouseDown to True or False
     if(pressed):
         mouseDown = True
@@ -78,23 +86,46 @@ print(checkFor(IS_RUNNING))
 curTime = int(time.time())
 while True:
     # small delay as to not overload the CPU
-    time.sleep(sleepTime)
-
+    time.sleep(SLEEP_TIME)
+    
     # this will check every second if the specified program is running or not. It will update running accordingly
-    if(int(time.time()) - curTime > 10):
+    if(int(time.time()) - curTime > CHECK_DELAY):
         #print(running, mouseDown) #debugging
+        print("checking")
 
         if(checkFor(IS_RUNNING) and not(running)):
             running = True
             print("running")
-            sleepTime = 0.02
+            SLEEP_TIME = 0.02
+            CHECK_DELAY = 20
 
         elif(not(checkFor(IS_RUNNING)) and running):
             running = False
             print("not running")
-            sleepTime = 10
+            SLEEP_TIME = 10
+            CHECK_DELAY = 5
+
         curTime = int(time.time())
 
-    elif(mouseDown and running): 
-        print(mouseDown)
+    # if the mouse is released and mouseDownTwo is True
+    if(not(mouseDown)):
+        #print("mouse up")
+        mouseDownTwo = False
+        timeDown = 0
+
+    # if the mouse if pressed and the program is running
+    if(mouseDown and running):
+        # check if mouseDownTwo to reset the timeDown
+        if(not(mouseDownTwo)):
+            timeDown = int(time.time() * 1000)
+            #print("mouse down")
+            mouseDownTwo = True
+        
+        #print(int(time.time() * 100) - timeDown)
+
+        # if the mouse has been depressed for over 90ms then move it
+        if(int(int(time.time() * 1000) - timeDown) > DEPRESSO):
+            Controller().move(randint(-(XVEL),XVEL), YVEL)
+
+        #print(mouseDown, timeDown, int((time.time()-timeDown) * 100)) # debugging
     
